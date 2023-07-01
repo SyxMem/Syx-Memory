@@ -87,7 +87,6 @@ This project is licensed under the MIT License.
 # Contact
 For inquiries, please contact:
 
-Afdul
 GitHub: Afdul2021
 
 Email: safetynet1333712@gmail.com
