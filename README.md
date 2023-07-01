@@ -67,6 +67,17 @@ To use Syx in your C++ project, follow these steps:
       }
      ```
 
+## Upcoming Features
+
+The following features are planned for future updates:
+
+- Read values from memory locations specified by nested pointers.
+- Enumerate and access process modules.
+- Read and write structures or objects in memory.
+- Support for more advanced memory manipulation techniques.
+
+Stay tuned for updates!
+
 # Contributing
 Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
 
