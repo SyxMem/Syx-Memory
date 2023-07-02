@@ -1,6 +1,6 @@
-# Syx
+# SyxLib
 
-Syx is a C++ library that provides memory access and manipulation capabilities for a target process. It allows you to read and write values to specific memory locations, perform nested pointer dereferencing, and retrieve the base address of loaded modules.
+SyxLib is a C++ library that provides memory access and manipulation capabilities for a target process. It allows you to read and write values to specific memory locations, perform nested pointer dereferencing, and retrieve the base address of loaded modules.
 
 ## Features
 
@@ -11,12 +11,12 @@ Syx is a C++ library that provides memory access and manipulation capabilities f
 
 ## Installation
 
-To use Syx in your C++ project, follow these steps:
+To use SyxLib in your C++ project, follow these steps:
 
 1. Clone the repository:
 
    ```shell
-   git clone https://github.com/your-organization/syx.git
+   git clone https://github.com/SyxMem/Syx-Memory.git
    ```
 
 1. Include the necessary header files in your project:
