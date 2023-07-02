@@ -1,92 +1,77 @@
 # SyxLib
 
-SyxLib is a C++ library that provides memory access and manipulation capabilities for a target process. It allows you to read and write values to specific memory locations, perform nested pointer dereferencing, and retrieve the base address of loaded modules.
+SyxLib is a C++ class that provides functions for memory operations and pattern searching in a Windows environment. It simplifies common memory-related tasks such as reading and writing memory, searching for patterns in memory, and retrieving module base addresses.
 
 ## Features
 
-- Write values to memory locations specified by nested pointers
-- Perform nested pointer dereferencing for complex data structures
-- Retrieve the base address of loaded modules by name
-- Robust error handling for invalid memory accesses
+- Memory comparison using masks
+- Pattern searching in memory regions
+- Nested pointer dereferencing for writing values to memory
+- Retrieving the base address of loaded modules
 
-## Installation
+## Documentation
 
-To use SyxLib in your C++ project, follow these steps:
+Comprehensive documentation for SyxLib is coming soon! It will provide detailed information on how to use the library and its available functions.
 
-1. Clone the repository:
+Stay tuned for updates on the documentation website.
 
-   ```shell
-   git clone https://github.com/SyxMem/Syx-Memory.git
-   ```
+## Usage
 
-1. Include the necessary header files in your project:
-    ```cpp
-    #include "syx/syx.h"
-    ```
+1. Include the `Syx.h` header file in your project.
+2. To use the memory utility functions, call them directly using the `Syx::` scope resolution operator. You don't need to create an instance of the `Syx` class.
 
-2. Build and link the Syx library in your project.
+### Example: Searching for a Pattern
 
+```cpp
+#include "Syx.h"
 
+int main()
+{
+    DWORD64 addressToSearch = 0x12345678;
+    DWORD searchLength = 100;
+    BYTE pattern[] = { 0x90, 0x90, 0x90 };
+    char mask[] = "xxx";
 
+    DWORD64 foundAddress = Syx::FindPattern(addressToSearch, searchLength, pattern, mask);
+    if (foundAddress)
+    {
+        printf("Pattern found at address: 0x%llX\n", foundAddress);
+    }
+    else
+    {
+        printf("Pattern not found.\n");
+    }
 
-# Usage
+    return 0;
+}
+```
 
-1. Create an instance of the `Syx` class by providing the base address of the target process.
+## Example: Writing to a Memory Location with Nested Pointers
+```cpp
+#include "Syx.h"
 
-   ```cpp
-   uintptr_t baseAddress = /* Set the base address of your target process */;
-   Syx syx(baseAddress);
-   ```
+int main()
+{
+    uintptr_t baseAddress = Syx::GetModuleHandleEx("ModuleName.dll");
+    std::vector<uintptr_t> offsets = { 0x10, 0x20, 0x30 };
+    int valueToWrite = 42;
 
-2. Use the available functions to access and manipulate memory in the target process. 
-   - WritePTR: Write a value to a memory location specified by a nested pointer.
-      ```cpp
-      std::vector<uintptr_t> offsets = { 0x10, 0x20, 0x30 }; // Example offsets
-      int valueToWrite = 42;
-      syx.WritePTR(offsets, valueToWrite);
-      ```
+    try
+    {
+        Syx::WritePTR(baseAddress, offsets, valueToWrite);
+        printf("Value successfully written to memory.\n");
+    }
+    catch (const std::exception& e)
+    {
+        printf("Error: %s\n", e.what());
+    }
 
-   - GetModuleHandleEx: Get the base address of a loaded module by name.
-     ```cpp
-      const char* moduleName = "kernel32.dll"; // Example module name
-      uintptr_t moduleBase = syx.GetModuleHandleEx(moduleName);
-      if (moduleBase != 0) {
-        // Module found, perform operations with the module base address
-      } else {
-        // Module not found
-      }
-     ```
+    return 0;
+}
+```
 
-   - Handle exceptions for error scenarios. The functions may throw `std::runtime_error` if an invalid memory access is encountered.
-     ```cpp
-      try {
-        // Use Syx functions
-      } catch (const std::runtime_error& e) {
-        // Handle the error, such as logging or displaying an error message
-      std::cerr << "Error: " << e.what() << std::endl;
-      }
-     ```
+## Contributions
+Contributions to the SyxLib project are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
 
-## Upcoming Features
-
-The following features are planned for future updates:
-
-- Read values from memory locations specified by nested pointers.
-- Enumerate and access process modules.
-- Read and write structures or objects in memory.
-- Support for more advanced memory manipulation techniques.
-
-Stay tuned for updates!
-
-# Contributing
-Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue or submit a pull request.
-
-# License
-This project is licensed under the MIT License.
-
-# Contact
-For inquiries, please contact:
-
-GitHub: Afdul2021
-
-Email: safetynet1333712@gmail.com
+## License
+The SyxLib is open-source software released under the [MIT License](https://github.com/SyxMem/Syx-Memory/blob/main/LICENSE).
