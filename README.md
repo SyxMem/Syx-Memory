@@ -11,9 +11,7 @@ SyxLib is a C++ class that provides functions for memory operations and pattern 
 
 ## Documentation
 
-Comprehensive documentation for SyxLib is coming soon! It will provide detailed information on how to use the library and its available functions.
-
-Stay tuned for updates on the documentation website.
+Comprehensive [documentation for SyxLib ](https://syxmem.mikuhyperpop.lol)It will provide detailed information on how to use the library and its available functions.
 
 ## Usage
 
