@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <vector>
 #include <Windows.h>
 
 /**
@@ -41,13 +42,13 @@ public:
      * @param szMask Pointer to the mask string.
      * @return The address where the pattern was found, or 0 if not found.
      */
-    static DWORD64 FindPattern(DWORD64 dwAddress, DWORD dwLen, BYTE* bMask, char* szMask)
+    static uintptr_t FindPattern(uintptr_t dwAddress, uintptr_t dwLen, BYTE* bMask, char* szMask)
     {
-        for (DWORD i = 0; i < dwLen; i++)
+        for (uintptr_t i = 0; i < dwLen; i++)
         {
             if (DataCompare((BYTE*)(dwAddress + i), bMask, szMask))
             {
-                return (DWORD64)(dwAddress + i);
+                return (uintptr_t)(dwAddress + i);
             }
         }
         return 0;
@@ -96,5 +97,110 @@ public:
     {
         return reinterpret_cast<uintptr_t>(GetModuleHandleA(moduleName));
     }
+
+    /**
+     * Detours a function by replacing its code with a jump to a detour function.
+     *
+     * @param src Pointer to the function to detour.
+     * @param dest Pointer to the detour function.
+     * @param jumplength Length of the jump instruction.
+     * @return A pointer to the original code of the function.
+     */
+    static const void* DetourFunc64(BYTE* const src, const BYTE* dest, const unsigned int jumplength)
+    {
+        // Allocate a memory page that is going to contain executable code.
+        MEMORY_BASIC_INFORMATION mbi;
+        for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
+        {
+            if (!VirtualQuery((LPCVOID)addr, &mbi, sizeof(mbi)))
+            {
+                break;
+            }
+
+            if (mbi.State == MEM_FREE)
+            {
+                if (presenthook64 = (HookContext*)VirtualAlloc(mbi.BaseAddress, 0x1000, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))
+                {
+                    break;
+                }
+            }
+        }
+
+        // If allocating a memory page failed, the function failed.
+        if (!presenthook64)
+        {
+            return nullptr;
+        }
+
+        // Save original code and apply detour. The detour code is:
+        // push rax
+        // movabs rax, 0xCCCCCCCCCCCCCCCC
+        // xchg rax, [rsp]
+        // ret
+        BYTE detour[] = { 0x50, 0x48, 0xB8, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0x48, 0x87, 0x04, 0x24, 0xC3 };
+        const unsigned int length = jumplength;
+        memcpy(presenthook64->original_code, src, length);
+        memcpy(&presenthook64->original_code[length], detour, sizeof(detour));
+        *(SIZE_T*)&presenthook64->original_code[length + 3] = (SIZE_T)src + length;
+
+        // Build a far jump to the destination function.
+        *(WORD*)&presenthook64->far_jmp = 0x25FF;
+        *(DWORD*)(presenthook64->far_jmp + 2) = (DWORD)((SIZE_T)presenthook64 - (SIZE_T)src + FIELD_OFFSET(HookContext, dst_ptr) - 6);
+        presenthook64->dst_ptr = (SIZE_T)dest;
+
+        // Write the hook to the original function.
+        DWORD flOld = 0;
+        VirtualProtect(src, 6, PAGE_EXECUTE_READWRITE, &flOld);
+        memcpy(src, presenthook64->far_jmp, sizeof(presenthook64->far_jmp));
+        VirtualProtect(src, 6, flOld, &flOld);
+
+        // Return a pointer to the original code.
+        return presenthook64->original_code;
+    }
+
+    /**
+     * Detours a function in a 32-bit environment.
+     *
+     * @param src Pointer to the source function to be detoured.
+     * @param dest Pointer to the destination function where the execution should be redirected.
+     * @param length Length of the overwritten instructions.
+     * @return Pointer to the original code of the detoured function.
+     */
+    static const void* DetourFunc32(BYTE* const src, const BYTE* dest, const unsigned int length)
+    {
+        const auto detourLength = length < 5 ? 5 : length;
+
+        BYTE* jmp = new BYTE[detourLength];
+        DWORD dwOldProtect, dwBkup, dwRelAddr;
+        VirtualProtect(src, detourLength, PAGE_EXECUTE_READWRITE, &dwOldProtect);
+        dwRelAddr = (DWORD)(dest - src) - 5;
+        *src = 0xE9;
+        *(DWORD*)(src + 1) = dwRelAddr;
+        for (unsigned int i = 5; i < detourLength; i++)
+        {
+            *(src + i) = 0x90;
+        }
+        VirtualProtect(src, detourLength, dwOldProtect, &dwBkup);
+
+        memcpy(jmp, src, detourLength);
+        jmp += detourLength;
+        *(jmp - 5) = 0xE9;
+        *(DWORD*)(jmp - 4) = (DWORD)((src - jmp) - 5);
+
+        return (jmp - detourLength);
+    }
+
+private:
+    struct HookContext
+    {
+        BYTE original_code[64];
+        SIZE_T dst_ptr;
+        BYTE far_jmp[6];
+    };
+
+    static HookContext* presenthook64;
 };
 
+
+//Don't touch, let it be here.
+Syx::HookContext* Syx::presenthook64;
