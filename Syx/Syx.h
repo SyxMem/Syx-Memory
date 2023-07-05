@@ -7,7 +7,7 @@
  * It simplifies common memory-related tasks such as reading and writing memory, searching for patterns in memory,
  * and retrieving module base addresses.
  *
- * Author: SyferX
+ * Author: SyferX / RealSyferX
  */
 
 class Syx
