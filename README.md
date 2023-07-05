@@ -8,6 +8,33 @@ SyxLib is a C++ class that provides functions for memory operations and pattern 
 - Pattern searching in memory regions
 - Nested pointer dereferencing for writing values to memory
 - Retrieving the base address of loaded modules
+- Function detouring: Detour functions in both 32-bit and 64-bit environments.
+
+## Function Detouring
+
+The SyxLib library supports function detouring in both 32-bit and 64-bit environments. It provides two functions for detouring functions: `DetourFunc32` and `DetourFunc64`.
+
+### DetourFunc32
+
+DetourFunc32 is used to detour functions in a 32-bit environment.
+
+```cpp
+const void* DetourFunc32(BYTE* const src, const BYTE* dest, const unsigned int length);
+```
+
+### DetourFunc64
+DetourFunc64 is used to detour functions in a 64-bit environment.
+
+```cpp
+const void* DetourFunc64(BYTE* const src, const BYTE* dest, const unsigned int jumplength);
+```
+
+- `src`: Pointer to the source function to be detoured.
+- `dest`: Pointer to the destination function where the execution should be redirected.
+- `length`: Length of the overwritten instructions.
+- `Returns`: Pointer to the original code of the detoured function.
+
+
 
 ## Documentation
 
@@ -44,7 +71,7 @@ int main()
 }
 ```
 
-## Example: Writing to a Memory Location with Nested Pointers
+### Example: Writing to a Memory Location with Nested Pointers
 ```cpp
 #include "Syx.h"
 
@@ -66,6 +93,24 @@ int main()
 
     return 0;
 }
+```
+
+### Example: DetourFunc32/64 function to detour a function:
+```cpp
+
+// Address to hook
+uintptr_t Address = 0x37C5D2FA;
+
+// Hook64 Location
+#ifdef _WIN64
+oProcessEvent = reinterpret_cast(Syx::DetourFunc64(reinterpret_cast(Address), reinterpret_cast(hProcessEvent64), 18));
+#endif
+
+// Hook32 Location
+#ifdef _WIN32
+oProcessEvent = reinterpret_cast(Syx::DetourFunc32(reinterpret_cast(Address), reinterpret_cast(hProcessEvent32), 5));
+#endif
+
 ```
 
 ## Contributions
