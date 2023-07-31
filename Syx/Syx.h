@@ -8,6 +8,7 @@
  * and retrieving module base addresses.
  *
  * Author: SyferX / RealSyferX
+ * Version : 1.1
  */
 
 class Syx
@@ -55,24 +56,24 @@ public:
     }
 
     /**
-     * Writes a value to a memory location specified by a nested pointer.
-     *
-     * @param baseAddress The base address to start the nested pointer dereferencing.
-     * @param offsets A vector of offsets that define the path to the desired memory location.
-     * @param valueHere The value to be written to the memory location.
-     * @throw std::runtime_error if an invalid pointer is encountered during the dereferencing process.
-     */
+      * Writes a value to a memory location specified by a nested pointer.
+      *
+      * @param baseAddress The base address to start the nested pointer dereferencing.
+      * @param offsets A vector of offsets that define the path to the desired memory location.
+      * @param valueHere The value to be written to the memory location.
+      * @throw std::runtime_error if an invalid pointer is encountered during the dereferencing process.
+      */
     template <typename T>
     static void WritePTR(uintptr_t baseAddress, const std::vector<uintptr_t>& offsets, T valueHere)
     {
-        uintptr_t* currentPtr = (uintptr_t*)baseAddress;
+        uintptr_t* currentPtr = reinterpret_cast<uintptr_t*>(baseAddress);
 
         try {
             for (size_t i = 0; i < offsets.size(); i++) {
                 if (!currentPtr) {
-                    throw std::runtime_error("Invalid pointer encountered.");
+                    throw std::runtime_error("Invalid pointer encountered at offset " + std::to_string(i) + ".");
                 }
-                currentPtr = (uintptr_t*)(*currentPtr + offsets[i]);
+                currentPtr = reinterpret_cast<uintptr_t*>(*currentPtr + offsets[i]);
             }
 
             if (!currentPtr) {
@@ -110,16 +111,17 @@ public:
     {
         // Allocate a memory page that is going to contain executable code.
         MEMORY_BASIC_INFORMATION mbi;
-        for (SIZE_T addr = (SIZE_T)src; addr > (SIZE_T)src - 0x80000000; addr = (SIZE_T)mbi.BaseAddress - 1)
+        const SIZE_T pageSize = 0x1000;
+        for (SIZE_T addr = reinterpret_cast<SIZE_T>(src); addr > reinterpret_cast<SIZE_T>(src) - 0x80000000; addr = reinterpret_cast<SIZE_T>(mbi.BaseAddress) - 1)
         {
-            if (!VirtualQuery((LPCVOID)addr, &mbi, sizeof(mbi)))
+            if (!VirtualQuery(reinterpret_cast<LPCVOID>(addr), &mbi, sizeof(mbi)))
             {
                 break;
             }
 
             if (mbi.State == MEM_FREE)
             {
-                if (presenthook64 = (HookContext*)VirtualAlloc(mbi.BaseAddress, 0x1000, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE))
+                if (presenthook64 = reinterpret_cast<HookContext*>(VirtualAlloc(mbi.BaseAddress, pageSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE)))
                 {
                     break;
                 }
