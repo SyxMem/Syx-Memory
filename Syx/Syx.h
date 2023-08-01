@@ -1,5 +1,7 @@
 #include <stdexcept>
 #include <vector>
+#include <string>
+#include <sstream>
 #include <Windows.h>
 
 /**
@@ -8,7 +10,7 @@
  * and retrieving module base addresses.
  *
  * Author: SyferX / RealSyferX
- * Version : 1.1
+ * Version : 1.2
  */
 
 class Syx
