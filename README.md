@@ -48,6 +48,7 @@ Comprehensive [documentation for SyxLib ](https://syxmem.mikuhyperpop.lol)It wil
 
 ### Example: Searching for a Pattern
 
+#### Manual Length Pattern Scanning
 ```cpp
 #include "Syx.h"
 
@@ -71,6 +72,24 @@ int main()
     return 0;
 }
 ```
+
+#### Auto Length Pattern Scanning
+```cpp
+int main()
+{
+    uintptr_t Address[1024];
+    const wchar_t* UserAssembly = L"UserAssembly.dll";
+    char Address1M[] = "x????xxxx?xxx?xxxx?????xx";
+    char NoFallDamage[] = "\xE8\x99\x99\x99\x99\x48\x85\xC0\x74\x99\x48\x8B\x4F\x99\x48\x85\xC9\x0F\x99\x99\x99\x99\x99\x8B\x51";
+    Address[1] = Syx::FindPatternA(UserAssembly, NoFallDamage, Address1M);
+
+    return 0;
+}
+
+
+```
+
+
 
 ### Example: Writing to a Memory Location with Nested Pointers
 ```cpp
