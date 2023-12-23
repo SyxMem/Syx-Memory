@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <Psapi.h>
 #include <Windows.h>
 
 /**
@@ -10,7 +11,7 @@
  * and retrieving module base addresses.
  *
  * Author: SyferX / RealSyferX
- * Version : 1.2
+ * Version : 1.3
  */
 
 class Syx
@@ -37,6 +38,22 @@ public:
     }
 
     /**
+     * Retrieves information about a module by its name.
+     *
+     * @param szModule The name of the module.
+     * @return MODULEINFO structure containing information about the module.
+     */
+    static MODULEINFO GetModuleInfo(const wchar_t* szModule)
+    {
+        MODULEINFO modinfo{ 0 };
+        HMODULE hModule = GetModuleHandle(szModule);
+        if (hModule == 0)
+            return modinfo;
+        GetModuleInformation(GetCurrentProcess(), hModule, &modinfo, sizeof(MODULEINFO));
+        return modinfo;
+    }
+
+    /**
      * Searches for a pattern in a specified memory region.
      *
      * @param dwAddress Starting address of the memory region.
@@ -55,6 +72,38 @@ public:
             }
         }
         return 0;
+    }
+
+    /**
+     * Searches for a pattern in an auto memory region.
+     *
+     * @param module The name of the module to search in.
+     * @param pattern The pattern to search for.
+     * @param mask The mask specifying which bytes in the pattern to consider.
+     * @return The address of the found pattern, or NULL if not found.
+     */
+    static uintptr_t FindPatternA(const wchar_t* module, char* pattern, char* mask)
+    {
+        MODULEINFO mInfo = GetModuleInfo(module);
+        uintptr_t base = (uintptr_t)mInfo.lpBaseOfDll;//10000000
+        uintptr_t size = (uintptr_t)mInfo.SizeOfImage;//6000000
+
+        uintptr_t patternLength = (uintptr_t)strlen(mask);
+
+        for (uintptr_t i = 0; i < size - patternLength; i++)
+        {
+            bool found = true;
+            for (uintptr_t j = 0; j < patternLength; j++)
+            {
+                found &= mask[j] == '?' || pattern[j] == *(char*)(base + i + j);
+            }
+            if (found)
+            {
+                return base + i;
+            }
+        }
+
+        return NULL;
     }
 
     /**
