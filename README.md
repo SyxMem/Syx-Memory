@@ -1,7 +1,7 @@
 # SyxLib
 
 SyxLib is a C++ class that provides functions for memory operations and pattern searching in a Windows environment. It simplifies common memory-related tasks such as reading and writing memory, searching for patterns in memory, and retrieving module base addresses.
-### Version : 1.1
+### Version : 1.3
 
 ## Features
 
