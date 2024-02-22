@@ -39,7 +39,7 @@ const void* DetourFunc64(BYTE* const src, const BYTE* dest, const unsigned int j
 
 ## Documentation
 
-Comprehensive [documentation for SyxLib ](https://syxmem.mikuhyperpop.lol)It will provide detailed information on how to use the library and its available functions.
+Comprehensive [documentation for SyxLib ](https://syxmem.syferx.pro/index.php)It will provide detailed information on how to use the library and its available functions.
 
 ## Usage
 
